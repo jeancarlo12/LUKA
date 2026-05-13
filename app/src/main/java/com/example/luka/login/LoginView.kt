@@ -79,6 +79,25 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
     }
 }
 
+fun registerButton(){
+    Button(onClick = { onSingupSelected() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+
+
+        ), enabled = registerEnable
+
+    ) {
+        Text(text = "Sing up",
+            color = Color.White)
+    }
+
+}
+}
+
 @Composable
 fun LoginButton(loginEnable: Boolean, onLoginsSelected:() -> Unit){
     Button(onClick = { onLoginsSelected() },
