@@ -26,13 +26,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -55,6 +51,7 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
     val password : String by viewModel.password.observeAsState(initial = "")
     val loginEnable: Boolean by viewModel.loginEnable.observeAsState(initial = false)
     val isLoading: Boolean by viewModel.isLoading.observeAsState(false)
+    val showError: Boolean by viewModel.showError.observeAsState(false)
     val coroutineScope = rememberCoroutineScope()
 
     if (isLoading) {
@@ -71,6 +68,16 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
             Spacer(modifier = modifier.padding(8.dp))
             ForgotPassword(Modifier.align(Alignment.End))
             Spacer(modifier = modifier.padding(16.dp))
+            
+            if (showError) {
+                Text(
+                    text = "Contraseña incorrecta",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
+                )
+            }
+
             LoginButton(loginEnable) {
                 coroutineScope.launch {
                     viewModel.onLoginSelected()
@@ -186,4 +193,3 @@ fun HeaderImage(modifier: Modifier){
       modifier = modifier
   )
 }
-

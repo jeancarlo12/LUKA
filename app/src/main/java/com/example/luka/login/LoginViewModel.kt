@@ -20,10 +20,14 @@ class LoginViewModel : ViewModel(){
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading : LiveData<Boolean> = _isLoading
 
+    private val _showError = MutableLiveData<Boolean>()
+    val showError: LiveData<Boolean> = _showError
+
     fun onLoginChange(email : String, password : String){
         _email.value = email
         _password.value = password
         _loginEnable.value = isValidEmail (email) && isValidPassword (password)
+        _showError.value = false
     }
 
     private fun isValidEmail(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -32,7 +36,11 @@ class LoginViewModel : ViewModel(){
 
     suspend fun onLoginSelected() {
         _isLoading.value = true
-        delay(4000)
+        delay(2000)
         _isLoading.value = false
+        // Simulating incorrect password if it's not "admin123"
+        if (_password.value != "admin123") {
+            _showError.value = true
+        }
     }
 }
