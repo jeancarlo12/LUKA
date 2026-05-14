@@ -1,6 +1,7 @@
 package com.example.luka.login
 
 import com.example.luka.R
+import com.example.luka.register.registerViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -75,12 +76,20 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
                     viewModel.onLoginSelected()
                 }
             }
+            val registerEnable = false
+            registerButton(registerEnable){
+                coroutineScope.launch {
+                    registerViewModel.onRegisterSelected()
+                }
+            }
         }
     }
 }
 
-fun registerButton(){
-    Button(onClick = { onSingupSelected() },
+
+@Composable
+fun registerButton(registerEnable: Boolean, onRegisterSelected: () -> Unit){
+    Button(onClick = {onRegisterSelected()} ,
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
@@ -96,7 +105,7 @@ fun registerButton(){
     }
 
 }
-}
+
 
 @Composable
 fun LoginButton(loginEnable: Boolean, onLoginsSelected:() -> Unit){
@@ -120,7 +129,7 @@ fun LoginButton(loginEnable: Boolean, onLoginsSelected:() -> Unit){
 @Composable
 fun ForgotPassword(modifier: Modifier) {
     Text(
-        text = "Forget Passwordx?",
+        text = "Forget Password?",
         modifier = modifier.clickable{ },
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
@@ -167,6 +176,7 @@ fun EmailField(email: String, onTextFieldChanged: (String)-> Unit) {
         )
       )
     }
+
 
 @Composable
 fun HeaderImage(modifier: Modifier){

@@ -2,12 +2,10 @@ package com.example.luka.navigation
 
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-
-
 
 
 @Composable
@@ -22,6 +20,9 @@ fun AppNavigation(){
         composable("login"){
             LoginView(navController = navController)
         }
+        composable("register"){
+
+        }
 
 
 
@@ -29,4 +30,9 @@ fun AppNavigation(){
 
 
 
+}
+
+@Composable
+fun LoginView(navController: NavHostController) {
+    TODO("Not yet implemented")
 }
