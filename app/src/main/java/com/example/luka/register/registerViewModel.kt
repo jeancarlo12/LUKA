@@ -5,12 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.delay
 
-class registerViewModel: ViewModel(){
+class registerViewModel(): ViewModel(){
 
-    fun (
+    var fullName = mutableStateOf(" ")
+
+    fun register(
         fullName: String
 
-    )
+    ) {
+    }
+
+
 
     val _isLoading = mutableStateOf(true)
 
@@ -25,5 +30,8 @@ class registerViewModel: ViewModel(){
         fun onRegisterSelected() {
             TODO("Not yet implemented")
         }
+
+
+
     }
 }
