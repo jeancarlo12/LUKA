@@ -1,7 +1,6 @@
 package com.example.luka.login
 
 import com.example.luka.R
-import com.example.luka.register.registerViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,7 +31,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -43,7 +41,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController : NavController){
         Box(Modifier
             .fillMaxSize()
             .background(Color(0xFF0D1B2A))
-            .padding(16.dp)
+            .padding(24.dp)
             ){
         Login(Modifier.align(Alignment.Center), viewModel, navController)
     }
@@ -135,13 +133,13 @@ fun LoginButton(loginEnable: Boolean, onLoginsSelected:() -> Unit){
             .fillMaxWidth()
             .height(48.dp),
     colors = ButtonDefaults.buttonColors(
-        containerColor = Color(0xFF0D1B2A),
-        disabledContainerColor = Color.Blue
+        containerColor = Color(0xFF0D1B2A)
+
 
     ), enabled = loginEnable
 
     ) {
-        Text(text = "Sing in",
+        Text(text = "Sign In",
             color = Color.White)
     }
 
@@ -216,10 +214,11 @@ fun EmailField(email: String, onTextFieldChanged: (String)-> Unit) {
 @Composable
 fun HeaderImage(modifier: Modifier){
   Image(
-      painter = painterResource(id = R.drawable.logo),
+      painter = painterResource(id = R.drawable.dada),
       contentDescription = "Header",
       modifier = modifier
           .height(160.dp)
+          .background(Color(0xFF0D1B2A))
           .padding(bottom = 12.dp)
   )
 }
