@@ -23,6 +23,17 @@ class LoginViewModel : ViewModel(){
     private val _showError = MutableLiveData<Boolean>()
     val showError: LiveData<Boolean> = _showError
 
+    private val _showSuccessMessage = MutableLiveData<String?>()
+    val showSuccessMessage: LiveData<String?> = _showSuccessMessage
+
+    fun showSuccess(message: String) {
+        _showSuccessMessage.value = message
+    }
+
+    fun clearSuccessMessage() {
+        _showSuccessMessage.value = null
+    }
+
     fun onLoginChange(email : String, password : String){
         _email.value = email
         _password.value = password

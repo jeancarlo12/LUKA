@@ -4,12 +4,14 @@ import com.example.luka.R
 import com.example.luka.register.registerViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +32,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -38,20 +42,22 @@ import kotlinx.coroutines.launch
 fun LoginScreen(viewModel: LoginViewModel, navController : NavController){
         Box(Modifier
             .fillMaxSize()
+            .background(Color(0xFF0D1B2A))
             .padding(16.dp)
             ){
-        Login(Modifier.align(Alignment.Center), viewModel)
+        Login(Modifier.align(Alignment.Center), viewModel, navController)
     }
 }
 
 @Composable
-fun Login(modifier: Modifier, viewModel: LoginViewModel) {
+fun Login(modifier: Modifier, viewModel: LoginViewModel, navController: NavController) {
 
     val email : String by viewModel.email.observeAsState(initial = "")
     val password : String by viewModel.password.observeAsState(initial = "")
     val loginEnable: Boolean by viewModel.loginEnable.observeAsState(initial = false)
     val isLoading: Boolean by viewModel.isLoading.observeAsState(false)
     val showError: Boolean by viewModel.showError.observeAsState(false)
+    val successMessage: String? by viewModel.showSuccessMessage.observeAsState(null)
     val coroutineScope = rememberCoroutineScope()
 
     if (isLoading) {
@@ -71,8 +77,17 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
             
             if (showError) {
                 Text(
-                    text = "Contraseña incorrecta",
+                    text = "Incorrect Password",
                     color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
+                )
+            }
+
+            if (successMessage != null) {
+                Text(
+                    text = successMessage!!,
+                    color = Color.Green,
                     fontSize = 14.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
                 )
@@ -83,11 +98,9 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
                     viewModel.onLoginSelected()
                 }
             }
-            val registerEnable = false
-            registerButton(registerEnable){
-                coroutineScope.launch {
-                    registerViewModel.onRegisterSelected()
-                }
+            Spacer(modifier = Modifier.padding(8.dp))
+            RegisterButton(Modifier.align(Alignment.CenterHorizontally)) {
+                navController.navigate("register")
             }
         }
     }
@@ -95,23 +108,24 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
 
 
 @Composable
-fun registerButton(registerEnable: Boolean, onRegisterSelected: () -> Unit){
-    Button(onClick = {onRegisterSelected()} ,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-
-
-        ), enabled = registerEnable
-
-    ) {
-        Text(text = "Sing up",
-            color = Color.White)
+fun RegisterButton(modifier: Modifier, onRegisterSelected: () -> Unit) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Don't have an account?",
+            color = Color.LightGray,
+            fontSize = 14.sp
+        )
+        TextButton(onClick = { onRegisterSelected() }) {
+            Text(
+                text = "Sign up",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+        }
     }
-
 }
+
 
 
 @Composable
@@ -121,7 +135,7 @@ fun LoginButton(loginEnable: Boolean, onLoginsSelected:() -> Unit){
             .fillMaxWidth()
             .height(48.dp),
     colors = ButtonDefaults.buttonColors(
-        containerColor = Color.Red,
+        containerColor = Color(0xFF0D1B2A),
         disabledContainerColor = Color.Blue
 
     ), enabled = loginEnable
@@ -140,7 +154,7 @@ fun ForgotPassword(modifier: Modifier) {
         modifier = modifier.clickable{ },
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0xFFE80A0A)
+        color = Color(0xFFFFFFFF)
         )
 }
 
@@ -154,12 +168,19 @@ fun PasswordField(password : String, onTextFieldChanged: (String)-> Unit){
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.colors(
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black,
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+
+            cursorColor = Color.White,
+
+            focusedContainerColor = Color(0xFF1B263B),
+            unfocusedContainerColor = Color(0xFF1B263B),
+
             focusedPlaceholderColor = Color.LightGray,
-            unfocusedPlaceholderColor = Color.LightGray
+            unfocusedPlaceholderColor = Color.Gray,
+
+            focusedIndicatorColor = Color(0xFF415A77),
+            unfocusedIndicatorColor = Color(0xFF415A77)
         )
     )
 }
@@ -173,14 +194,21 @@ fun EmailField(email: String, onTextFieldChanged: (String)-> Unit) {
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         singleLine = true,
          maxLines = 1,
-        colors = TextFieldDefaults.colors(
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black,
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedPlaceholderColor = Color.LightGray,
-            unfocusedPlaceholderColor = Color.LightGray
-        )
+          colors = TextFieldDefaults.colors(
+              focusedTextColor = Color.White,
+              unfocusedTextColor = Color.White,
+
+              cursorColor = Color.White,
+
+              focusedContainerColor = Color(0xFF1B263B),
+              unfocusedContainerColor = Color(0xFF1B263B),
+
+              focusedPlaceholderColor = Color.LightGray,
+              unfocusedPlaceholderColor = Color.Gray,
+
+              focusedIndicatorColor = Color(0xFF415A77),
+              unfocusedIndicatorColor = Color(0xFF415A77)
+          )
       )
     }
 
@@ -191,5 +219,7 @@ fun HeaderImage(modifier: Modifier){
       painter = painterResource(id = R.drawable.logo),
       contentDescription = "Header",
       modifier = modifier
+          .height(160.dp)
+          .padding(bottom = 12.dp)
   )
 }
