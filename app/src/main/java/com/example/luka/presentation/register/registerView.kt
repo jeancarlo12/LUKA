@@ -1,4 +1,4 @@
-package com.example.luka.register
+package com.example.luka.presentation.register
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,37 +38,36 @@ fun RegisterScreen(registerView: registerViewModel, navController : NavControlle
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "Create Account", modifier = Modifier.padding(bottom = 16.dp))
-            Form(registerView, navController, onRegisterSuccess)
+            
+            registerView.errorMessage.value?.let { 
+                Text(text = it, color = Color.Red, modifier = Modifier.padding(bottom = 8.dp))
+            }
+
+            Form(registerView, onRegisterSuccess)
         }
     }
 }
 
 
 @Composable
-fun Form(registerViewModel: registerViewModel, navController: NavController, onRegisterSuccess: () -> Unit ){
+fun Form(registerViewModel: registerViewModel, onRegisterSuccess: () -> Unit ){
     Column(modifier = Modifier) {
-
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = registerViewModel.fullName.value,
             onValueChange = { registerViewModel.fullName.value = it },
-            label = { Text("FullName") },
+            label = { Text("Full Name") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            maxLines = 1,
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedPlaceholderColor = Color.LightGray,
-                unfocusedPlaceholderColor = Color.LightGray
+                unfocusedContainerColor = Color.White
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = registerViewModel.Email.value,
@@ -80,18 +79,16 @@ fun Form(registerViewModel: registerViewModel, navController: NavController, onR
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedPlaceholderColor = Color.LightGray,
-                unfocusedPlaceholderColor = Color.LightGray
+                unfocusedContainerColor = Color.White
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = registerViewModel.DocumentNumber.value,
             onValueChange = { registerViewModel.DocumentNumber.value = it },
-            label = { Text("DocumentNumber") },
+            label = { Text("Document Number") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
@@ -99,15 +96,11 @@ fun Form(registerViewModel: registerViewModel, navController: NavController, onR
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedPlaceholderColor = Color.LightGray,
-                unfocusedPlaceholderColor = Color.LightGray
+                unfocusedContainerColor = Color.White
             )
-
-
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = registerViewModel.Password.value,
@@ -119,63 +112,45 @@ fun Form(registerViewModel: registerViewModel, navController: NavController, onR
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedPlaceholderColor = Color.LightGray,
-                unfocusedPlaceholderColor = Color.LightGray
+                unfocusedContainerColor = Color.White
             )
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = registerViewModel.ConfirmPassword.value,
             onValueChange = { registerViewModel.ConfirmPassword.value = it },
-            label = { Text("ConfirmPassword") },
+            label = { Text("Confirm Password") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedPlaceholderColor = Color.LightGray,
-                unfocusedPlaceholderColor = Color.LightGray
+                unfocusedContainerColor = Color.White
             )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
-
-        Button(onClick = {
-            android.util.Log.d("RegisterForm", "Button clicked")
-            registerViewModel.register(
-                fullName = registerViewModel.fullName.value,
-                Email = registerViewModel.Email.value,
-                DocumentNumber = registerViewModel.DocumentNumber.value,
-                Password = registerViewModel.Password.value,
-                ConfirmPassword = registerViewModel.ConfirmPassword.value,
-                OnResult = { success, result ->
+        Button(
+            onClick = {
+                registerViewModel.register { success ->
                     if (success) {
                         onRegisterSuccess()
                     }
                 }
-            )
-        } ,
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color.Gray
+                containerColor = Color.DarkGray,
+                contentColor = Color.White
             ),
-
-            ) {
-                Text(text = "Register",
-                    color = Color.Black)
-            }
-
+            enabled = !registerViewModel.isLoading.value
+        ) {
+            Text(text = "Register")
         }
-
     }
-
-
+}

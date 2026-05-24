@@ -1,5 +1,6 @@
-package com.example.luka.domain
+package com.example.luka.domain.useCase
 
+import com.example.luka.domain.AuthRepository
 import com.example.luka.domain.model.User
 
 class RegisterUseCase(private val repository: AuthRepository) {
