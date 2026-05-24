@@ -92,8 +92,10 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel, navController: NavContr
             }
 
             LoginButton(loginEnable) {
-                coroutineScope.launch {
-                    viewModel.onLoginSelected()
+                viewModel.onLoginSelected {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
             }
             Spacer(modifier = Modifier.padding(8.dp))

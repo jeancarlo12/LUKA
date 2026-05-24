@@ -1,4 +1,4 @@
-package com.example.luka.presentation.login
+package com.example.luka.login
 
 import android.util.Log
 import android.util.Patterns
@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 
 class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -28,14 +29,6 @@ class LoginViewModel : ViewModel() {
     private val _showSuccessMessage = MutableLiveData<String?>()
     val showSuccessMessage: LiveData<String?> = _showSuccessMessage
 
-    fun showSuccess(message: String) {
-        _showSuccessMessage.value = message
-    }
-
-    fun clearSuccessMessage() {
-        _showSuccessMessage.value = null
-    }
-
     fun onLoginChange(email: String, password: String) {
         _email.value = email
         _password.value = password
@@ -46,6 +39,14 @@ class LoginViewModel : ViewModel() {
     private fun isValidEmail(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
     private fun isValidPassword(password: String): Boolean = password.length >= 6
+
+    fun showSuccess(message: String) {
+        _showSuccessMessage.value = message
+    }
+
+    fun clearSuccessMessage() {
+        _showSuccessMessage.value = null
+    }
 
     fun onLoginSelected(onLoginSuccess: () -> Unit) {
         val emailVal = _email.value ?: return
