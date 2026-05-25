@@ -1,7 +1,7 @@
 package com.example.luka.data
 
 import android.util.Log
-import com.example.luka.domain.AuthRepository
+import com.example.luka.domain.repository.AuthRepository
 import com.example.luka.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -26,16 +26,16 @@ class AuthRepositoryImpl : AuthRepository {
         onResult: (Boolean, Int) -> Unit
     ) {
         Log.d("LUKA_DEBUG", "1. AuthRepository: Inciando Auth para ${user.email}")
-        
+
         auth.createUserWithEmailAndPassword(user.email, user.password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid
                     Log.d("LUKA_DEBUG", "2. AuthRepository: Auth OK. UID: $userId")
-                    
+
                     if (userId != null) {
                         Log.d("LUKA_DEBUG", "3. AuthRepository: Intentando guardar en Firestore...")
-                        
+
                         // Usar un Map para asegurar compatibilidad total con Firestore
                         val userMap = hashMapOf(
                             "fullName" to user.fullName,

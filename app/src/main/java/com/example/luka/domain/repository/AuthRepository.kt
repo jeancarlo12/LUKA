@@ -1,4 +1,4 @@
-package com.example.luka.domain
+package com.example.luka.domain.repository
 
 import com.example.luka.domain.model.User
 
