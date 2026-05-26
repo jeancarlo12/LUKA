@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -41,13 +40,15 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun HomeView(viewModel: HomeViewModel= HomeViewModel(),
+fun HomeView(viewModel: HomeViewModel = viewModel(),
         navController: NavController
 ) {
     LaunchedEffect(Unit) {
         viewModel.loadTrasanctions()
+        viewModel.loadUsername()
     }
     Column(
         modifier = Modifier
@@ -57,7 +58,7 @@ fun HomeView(viewModel: HomeViewModel= HomeViewModel(),
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HeaderSection()
+        HeaderSection(viewModel)
         
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -65,7 +66,7 @@ fun HomeView(viewModel: HomeViewModel= HomeViewModel(),
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        quickActions(navController)
+        QuickActions(navController)
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -89,7 +90,7 @@ fun HomeView(viewModel: HomeViewModel= HomeViewModel(),
 }
 
 @Composable
-fun HeaderSection() {
+fun HeaderSection(viewModel: HomeViewModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -97,7 +98,7 @@ fun HeaderSection() {
     ) {
         Column {
             Text(
-                text = "Hi User",
+                text = "Hello ${viewModel.userName.value}",
                 color = Color.White,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
@@ -147,7 +148,7 @@ fun BalanceCard(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun quickActions(navController: NavController){
+fun QuickActions(navController: NavController){
     Column {
         Text(
             text = "Quick Actions",
@@ -268,18 +269,6 @@ fun RecentTransaction(viewModel: HomeViewModel){
                 amount = it.amount
             )
             Spacer(modifier = Modifier.height(10.dp))
-
-            TransactionItem(
-                title = it.title,
-                amount = it.amount
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-            TransactionItem(
-                title = it.title,
-                amount = it.amount
-            )
-
         }
     }
 }

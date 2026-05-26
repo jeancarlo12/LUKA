@@ -117,4 +117,24 @@ class AuthRepositoryImpl : AuthRepository {
             }
             .addOnFailureListener { onResult(emptyList()) }
     }
+    fun getUserName(onResult: (String) -> Unit){
+        val uid=auth.currentUser?.uid
+
+        if (uid == null){
+            onResult("User")
+            return
+        }
+        firestore
+            .collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener{
+                val fullName =
+                    it.getString("fullName")
+                    onResult(fullName ?: "User")
+            }
+            .addOnFailureListener{
+                onResult("User")
+            }
+    }
 }
