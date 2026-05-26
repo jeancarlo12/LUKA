@@ -40,11 +40,15 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun HomeView(viewModel: HomeViewModel= HomeViewModel(),
         navController: NavController
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.loadTrasanctions()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()

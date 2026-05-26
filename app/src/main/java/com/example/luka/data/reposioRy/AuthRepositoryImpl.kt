@@ -1,8 +1,9 @@
-package com.example.luka.data
+package com.example.luka.data.reposioRy
 
 import android.util.Log
-import com.example.luka.domain.repository.AuthRepository
+import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.model.User
+import com.example.luka.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
@@ -74,5 +75,46 @@ class AuthRepositoryImpl : AuthRepository {
                     onResult(false, errorCode)
                 }
             }
+    }
+    override fun saveTransaction(transaction: Transaction, onResult: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+
+        if (uid == null) {
+            onResult(false)
+            return
+        }
+
+        firestore
+            .collection("users")
+            .document(uid)
+            .collection("transactions")
+            .add(transaction)
+            .addOnSuccessListener {
+                onResult(true)
+            }
+            .addOnFailureListener {
+                onResult(false)
+            }
+    }
+    fun getTransactions(onResult:(List<Transaction>) -> Unit){
+        val uid= auth.currentUser?.uid
+
+        if (uid == null){
+            onResult(emptyList())
+            return
+        }
+        firestore
+            .collection("users")
+            .document(uid)
+            .collection("transactions")
+
+            .get()
+            .addOnSuccessListener { result ->
+                val transaction = result.documents.mapNotNull {
+                    it.toObject(Transaction::class.java)
+                }
+                onResult(transaction)
+            }
+            .addOnFailureListener { onResult(emptyList()) }
     }
 }
