@@ -42,7 +42,8 @@ class AuthRepositoryImpl : AuthRepository {
                             "fullName" to user.fullName,
                             "email" to user.email,
                             "documentNumber" to user.documentNumber,
-                            "password" to user.password // Nota: En producción no deberías guardar la pass en Firestore
+                            "password" to user.password, // Nota: En producción no deberías guardar la pass en Firestore
+                            "balance" to 3000000.0
                         )
 
                         firestore.collection("users").document(userId)
@@ -96,7 +97,7 @@ class AuthRepositoryImpl : AuthRepository {
                 onResult(false)
             }
     }
-    fun getTransactions(onResult:(List<Transaction>) -> Unit){
+    override fun getTransactions(onResult:(List<Transaction>) -> Unit){
         val uid= auth.currentUser?.uid
 
         if (uid == null){
@@ -117,7 +118,7 @@ class AuthRepositoryImpl : AuthRepository {
             }
             .addOnFailureListener { onResult(emptyList()) }
     }
-    fun getUserName(onResult: (String) -> Unit){
+    override fun getUserName(onResult: (String) -> Unit){
         val uid=auth.currentUser?.uid
 
         if (uid == null){
@@ -137,4 +138,26 @@ class AuthRepositoryImpl : AuthRepository {
                 onResult("User")
             }
     }
+    override fun logout(){
+        auth.signOut()
+    }
+
+    override fun getUserBalance(onResult: (Double) -> Unit){
+        val uid=auth.currentUser?.uid
+        if(uid == null){
+            onResult(0.0)
+            return
+
+        }
+        firestore
+            .collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener {
+                val balance =it.getDouble("balance")?:0.0
+                onResult(balance)
+            }
+            .addOnFailureListener { onResult(0.0) }
+    }
 }
+

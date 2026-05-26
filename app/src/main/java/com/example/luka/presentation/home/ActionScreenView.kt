@@ -56,7 +56,7 @@ fun ActionScreen(
                 },
 
                 label = {
-                    Text("Recipient")
+                    Text("Recipient Email")
                 }
 
             )

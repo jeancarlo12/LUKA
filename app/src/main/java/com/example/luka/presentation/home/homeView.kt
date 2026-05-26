@@ -1,5 +1,6 @@
 package com.example.luka.presentation.home
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -33,13 +35,16 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Icon
-import com.google.firebase.firestore.Transaction
-import java.time.temporal.TemporalAmount
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.focus.focusModifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
@@ -49,6 +54,7 @@ fun HomeView(viewModel: HomeViewModel = viewModel(),
     LaunchedEffect(Unit) {
         viewModel.loadTrasanctions()
         viewModel.loadUsername()
+        viewModel.loadBalance()
     }
     Column(
         modifier = Modifier
@@ -58,7 +64,7 @@ fun HomeView(viewModel: HomeViewModel = viewModel(),
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HeaderSection(viewModel)
+        HeaderSection(viewModel, navController)
         
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -90,7 +96,7 @@ fun HomeView(viewModel: HomeViewModel = viewModel(),
 }
 
 @Composable
-fun HeaderSection(viewModel: HomeViewModel) {
+fun HeaderSection(viewModel: HomeViewModel, navController: NavController) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,12 +113,31 @@ fun HeaderSection(viewModel: HomeViewModel) {
                 text = "Welcome to luka",
                 color = Color.Gray
             )
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    navController.navigate("login") {
+                        popUpTo(0)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.DarkGray
+                )
+            ) {
+                Text(
+                    text = "logout",
+                    color = Color.White
+                )
+            }
+            
         }
     }
 }
 
 @Composable
 fun BalanceCard(viewModel: HomeViewModel) {
+    val isVisible = viewModel.isBalancedVisible.value
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,16 +158,28 @@ fun BalanceCard(viewModel: HomeViewModel) {
                 color = Color.LightGray,
             )
             Text(
-                text = "$${viewModel.balance.value.toInt()}",
+                text = if(isVisible)
+                    "$${viewModel.balance.value.toInt()}"
+                else
+                    "******",
+
                 color = Color.White,
                 fontSize = 38.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
-            Text(
-                text = "**** **** **** 1204",
-                color = Color.Gray,
-            )
+            Spacer(modifier= Modifier.width(8.dp))
+
+            IconButton(onClick = {viewModel.balancedVisibility()}) {
+                Icon(imageVector =
+                if(isVisible)
+                    Icons.Default.Visibility
+                else
+                    Icons.Default.VisibilityOff,
+                    "Toggle balance",
+                    tint = Color.White
+                )
+            }
         }
     }
 }

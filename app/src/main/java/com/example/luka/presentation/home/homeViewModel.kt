@@ -5,12 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.luka.data.reposioRy.AuthRepositoryImpl
 import com.example.luka.domain.model.Transaction
+import com.example.luka.domain.useCase.GetBalanceUseCase
 import com.example.luka.domain.useCase.GetTransactionsUseCase
 import com.example.luka.domain.useCase.getUserNameUseCase
+import com.example.luka.domain.useCase.logOutUserCase
 import com.example.luka.domain.useCase.saveTransactionUseCase
 
 class HomeViewModel : ViewModel() {
 
+    private val getBalanceUseCase = GetBalanceUseCase(AuthRepositoryImpl())
+    private val logOutUserCase = logOutUserCase(AuthRepositoryImpl())
     private val getUserNameUseCase = getUserNameUseCase(
         AuthRepositoryImpl())
     private val getTransactionsUseCase = GetTransactionsUseCase(
@@ -18,6 +22,8 @@ class HomeViewModel : ViewModel() {
     private val saveTransactionUseCase = saveTransactionUseCase(
         AuthRepositoryImpl())
 
+    var isBalancedVisible = mutableStateOf(true)
+        private set
     var userName = mutableStateOf("")
     var balance = mutableStateOf(3000000.0)
     var transactions = mutableStateListOf(
@@ -78,6 +84,19 @@ class HomeViewModel : ViewModel() {
     fun loadUsername(){
         getUserNameUseCase {
             userName.value = it
+        }
+    }
+
+    fun logout(){
+        logOutUserCase()
+    }
+
+    fun balancedVisibility(){
+        isBalancedVisible.value= !isBalancedVisible.value
+    }
+    fun loadBalance(){
+        getBalanceUseCase{
+            balance.value = it
         }
     }
 }
