@@ -6,14 +6,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.luka.presentation.home.ActionScreen
 import com.example.luka.presentation.home.HomeView
+import com.example.luka.presentation.home.HomeViewModel
 import com.example.luka.presentation.login.LoginScreen
 import com.example.luka.presentation.login.LoginViewModel
 import com.example.luka.presentation.register.RegisterScreen
 import com.example.luka.presentation.register.registerViewModel
-
-
-
 
 @Composable
 fun AppNavigation(){
@@ -21,6 +20,7 @@ fun AppNavigation(){
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
     val registerViewModel: registerViewModel = viewModel()
+    val homeViewModel: HomeViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -45,8 +45,26 @@ fun AppNavigation(){
             )
 
         }
-        composable("HOME"){
-            HomeView(navController = navController)
+        composable("home"){
+            HomeView(
+                viewModel = homeViewModel,
+                navController = navController
+            )
+        }
+        composable(route = "action/{title}"
+        ){
+            backStackEntry ->
+            val title =
+                backStackEntry.arguments
+                    ?.getString("title")
+                    ?: ""
+
+            ActionScreen(
+                title = title,
+                navController = navController,
+                homeViewModel = homeViewModel
+            )
+
         }
     }
 }

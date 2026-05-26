@@ -1,6 +1,7 @@
 package com.example.luka.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -36,32 +39,47 @@ import java.time.temporal.TemporalAmount
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+
 @Composable
-fun HomeView(
-    navController: NavController
+fun HomeView(viewModel: HomeViewModel= HomeViewModel(),
+        navController: NavController
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0D1B2A)) 
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HeaderSection()
         
         Spacer(modifier = Modifier.height(30.dp))
 
-        BalanceCard()
+        BalanceCard(viewModel)
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        quickActions()
+        quickActions(navController)
 
         Spacer(modifier = Modifier.weight(1f))
 
-        RecentTransaction()
-        Spacer(modifier = Modifier.weight(1f))
+        RecentTransaction(viewModel)
+        Spacer(modifier = Modifier.height(30.dp))
 
+        Button(
+            onClick = {
+                viewModel.addTransaction(
+                    title = "Transfer",
+                    amount = "-$50"
+                )
+            }
+        ) {
+            Text(
+                text = "Add Transaction"
+            )
+        }
         BottomBar()
     }
 }
@@ -75,7 +93,7 @@ fun HeaderSection() {
     ) {
         Column {
             Text(
-                text = "Hi Rafael",
+                text = "Hi User",
                 color = Color.White,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
@@ -89,7 +107,7 @@ fun HeaderSection() {
 }
 
 @Composable
-fun BalanceCard() {
+fun BalanceCard(viewModel: HomeViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,10 +128,11 @@ fun BalanceCard() {
                 color = Color.LightGray,
             )
             Text(
-                text = "3.000.000",
+                text = "$${viewModel.balance.value.toInt()}",
+                color = Color.White,
                 fontSize = 38.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                maxLines = 1
             )
             Text(
                 text = "**** **** **** 1204",
@@ -124,7 +143,7 @@ fun BalanceCard() {
 }
 
 @Composable
-fun quickActions(){
+fun quickActions(navController: NavController){
     Column {
         Text(
             text = "Quick Actions",
@@ -141,38 +160,62 @@ fun quickActions(){
         ) {
             ActionItem(
                 icon = Icons.Default.AttachMoney,
-                text = "Transfer"
+                text = "Transfer",
+                onClick = {
+                    navController.navigate(
+                        "action/Transfer"
+                    )
+                }
             )
 
             ActionItem(
                 icon = Icons.Default.CreditCard,
-                text = "Pay"
+                text = "Pay",
+                onClick = {
+                    navController.navigate(
+                        "action/Pay"
+                    )
+                }
+
             )
 
             ActionItem(
                 icon = Icons.Default.AccountBalance,
-                text = "Recharge"
+                text = "Recharge",
+                onClick = {
+                    navController.navigate(
+                        "action/recharge"
+                    )
+                }
             )
 
             ActionItem(
                 icon = Icons.Default.MoreHoriz,
-                text = "More"
+                text = "More",
+                onClick = {
+                    navController.navigate(
+                        "action/More"
+                    )
+                }
             )
         }
     }
 }
 
 @Composable
-fun ActionItem(icon: ImageVector, text: String) {
+fun ActionItem(icon: ImageVector, text: String,onClick:()->Unit={}) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Card(
-            modifier = Modifier.size(70.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF1B263B)
+        Card(modifier = Modifier
+            .size(
+                width = 75.dp,
+                height = 90.dp
             )
+            .clickable{
+                onClick()
+            },
+
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -196,7 +239,7 @@ fun ActionItem(icon: ImageVector, text: String) {
 }
 
 @Composable
-fun RecentTransaction(){
+fun RecentTransaction(viewModel: HomeViewModel){
     Column{
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -215,24 +258,25 @@ fun RecentTransaction(){
         }
         Spacer(modifier = Modifier.height(15.dp))
 
-        TransactionItem(
-            title = "NETFLIX",
-            amount = "-$15"
-        )
-        Spacer(modifier = Modifier.height(10.dp))
+        viewModel.transactions.forEach {
+            TransactionItem(
+                title = it.title,
+                amount = it.amount
+            )
+            Spacer(modifier = Modifier.height(10.dp))
 
-        TransactionItem(
-            title = "PIZZA",
-            amount = "-$15"
-        )
-        Spacer(modifier = Modifier.height(10.dp))
+            TransactionItem(
+                title = it.title,
+                amount = it.amount
+            )
+            Spacer(modifier = Modifier.height(10.dp))
 
-        TransactionItem(
-            title = "SALARY",
-            amount = "+$2.000"
-        )
+            TransactionItem(
+                title = it.title,
+                amount = it.amount
+            )
 
-
+        }
     }
 }
 
@@ -387,23 +431,4 @@ fun BottomItem(
 
 
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun HomePreview() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D1B2A))
-            .padding(24.dp)
-    ) {
-        HeaderSection()
-        Spacer(modifier = Modifier.height(30.dp))
-        BalanceCard()
-        Spacer(modifier = Modifier.height(30.dp))
-        quickActions()
-        Spacer(modifier = Modifier.height(30.dp))
-        RecentTransaction()
-        Spacer(modifier = Modifier.height(30.dp))
-        BottomBar()
-    }
-}
+
