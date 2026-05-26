@@ -31,7 +31,11 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Icon
-
+import com.google.firebase.firestore.Transaction
+import java.time.temporal.TemporalAmount
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Person
 @Composable
 fun HomeView(
     navController: NavController
@@ -54,6 +58,11 @@ fun HomeView(
         quickActions()
 
         Spacer(modifier = Modifier.weight(1f))
+
+        RecentTransaction()
+        Spacer(modifier = Modifier.weight(1f))
+
+        BottomBar()
     }
 }
 
@@ -186,6 +195,198 @@ fun ActionItem(icon: ImageVector, text: String) {
     }
 }
 
+@Composable
+fun RecentTransaction(){
+    Column{
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+            ){
+            Text(
+                text = "Recent Transactions",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "See All",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+
+        TransactionItem(
+            title = "NETFLIX",
+            amount = "-$15"
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        TransactionItem(
+            title = "PIZZA",
+            amount = "-$15"
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        TransactionItem(
+            title = "SALARY",
+            amount = "+$2.000"
+        )
+
+
+    }
+}
+
+@Composable
+fun TransactionItem(title: String, amount: String){
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF1B263B)
+        )
+    ){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Column {
+
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Today",
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+
+            }
+
+            Text(
+                text = amount,
+                color = if(amount.contains("+"))
+                    Color.Green
+                else
+                    Color.Red,
+
+                fontWeight = FontWeight.Bold
+            )
+
+        }
+
+    }
+
+}
+@Composable
+fun BottomBar(){
+
+    Card(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp),
+
+        shape = RoundedCornerShape(30.dp),
+
+        colors = CardDefaults.cardColors(
+            containerColor =
+                Color(0xFF1B263B)
+        )
+
+    ) {
+
+        Row(
+
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 25.dp),
+
+            horizontalArrangement =
+                Arrangement.SpaceBetween,
+
+            verticalAlignment =
+                Alignment.CenterVertically
+        ) {
+
+            BottomItem(
+                icon = Icons.Default.Home,
+                text = "Home"
+            )
+
+            BottomItem(
+                icon = Icons.Default.CreditCard,
+                text = "Cards"
+            )
+
+            BottomItem(
+                icon = Icons.Default.BarChart,
+                text = "Activity"
+            )
+
+            BottomItem(
+                icon = Icons.Default.Person,
+                text = "Profile"
+            )
+
+        }
+
+    }
+
+}
+
+@Composable
+fun BottomItem(
+    icon: ImageVector,
+    text:String
+){
+
+    Column(
+
+        horizontalAlignment =
+            Alignment.CenterHorizontally
+
+    ) {
+
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            tint = Color.White
+        )
+
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 10.sp
+        )
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomePreview() {
@@ -200,5 +401,9 @@ fun HomePreview() {
         BalanceCard()
         Spacer(modifier = Modifier.height(30.dp))
         quickActions()
+        Spacer(modifier = Modifier.height(30.dp))
+        RecentTransaction()
+        Spacer(modifier = Modifier.height(30.dp))
+        BottomBar()
     }
 }
