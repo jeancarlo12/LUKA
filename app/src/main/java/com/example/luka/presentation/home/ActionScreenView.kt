@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.text.font.FontWeight
@@ -86,6 +87,24 @@ fun ActionScreen(
                     color = Color.Red
                 )
             }
+            if(viewModel.successMessage.value.isNotEmpty()){
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = viewModel.successMessage.value,
+                    color = Color.Green
+                )
+            }
+
+            if(
+                viewModel.successMessage.value.isNotEmpty()){
+                LaunchedEffect(Unit){
+                    navController.popBackStack()
+
+                }
+
+            }
 
             Spacer(
                 modifier = Modifier.height(20.dp)
@@ -93,10 +112,6 @@ fun ActionScreen(
 
             Button(onClick = {
                     viewModel.sendTransfer(homeViewModel)
-                if(viewModel.errorMessage.value.isEmpty()){
-                    navController.popBackStack()
-                }
-
                 }
             ) {
                 Text(

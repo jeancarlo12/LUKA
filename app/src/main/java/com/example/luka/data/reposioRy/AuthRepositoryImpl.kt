@@ -142,22 +142,88 @@ class AuthRepositoryImpl : AuthRepository {
         auth.signOut()
     }
 
-    override fun getUserBalance(onResult: (Double) -> Unit){
-        val uid=auth.currentUser?.uid
-        if(uid == null){
+    override fun getBalance(onResult: (Double) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
             onResult(0.0)
             return
-
         }
         firestore
             .collection("users")
             .document(uid)
             .get()
             .addOnSuccessListener {
-                val balance =it.getDouble("balance")?:0.0
+                val balance = it.getDouble("balance") ?: 0.0
                 onResult(balance)
             }
             .addOnFailureListener { onResult(0.0) }
+    }
+
+    override fun transfer(recipientEmail: String, amount: Double, onResult: (Boolean, String) -> Unit) {
+        val senderUid = auth.currentUser?.uid
+
+        if (senderUid == null) {
+            onResult(false, "User not authenticated")
+            return
+        }
+
+        firestore
+            .collection("users")
+            .whereEqualTo("email", recipientEmail)
+            .get()
+            .addOnSuccessListener { result ->
+                if (result.isEmpty) {
+                    onResult(false, "User not found")
+                    return@addOnSuccessListener
+                }
+
+                val receiverDocument = result.documents.first()
+                val receiverUid = receiverDocument.id
+                val receiverBalance = receiverDocument.getDouble("balance") ?: 0.0
+
+                firestore
+                    .collection("users")
+                    .document(senderUid)
+                    .get()
+                    .addOnSuccessListener { senderDoc ->
+                        val senderBalance = senderDoc.getDouble("balance") ?: 0.0
+
+                        if (amount > senderBalance) {
+                            onResult(false, "Insufficient funds")
+                            return@addOnSuccessListener
+                        }
+
+                        val newSenderBalance = senderBalance - amount
+                        val newReceiverBalance = receiverBalance + amount
+                        
+
+                        firestore
+                            .collection("users")
+                            .document(senderUid)
+                            .update("balance", newSenderBalance)
+                            .addOnSuccessListener {
+                                firestore
+                                    .collection("users")
+                                    .document(receiverUid)
+                                    .update("balance", newReceiverBalance)
+                                    .addOnSuccessListener {
+                                        onResult(true, "Transfer successful")
+                                    }
+                                    .addOnFailureListener {
+                                        onResult(false, "Transfer failed updating receiver")
+                                    }
+                            }
+                            .addOnFailureListener {
+                                onResult(false, "Transfer failed updating sender")
+                            }
+                    }
+                    .addOnFailureListener {
+                        onResult(false, "Error fetching sender data")
+                    }
+            }
+            .addOnFailureListener {
+                onResult(false, "Transfer failed")
+            }
     }
 }
 

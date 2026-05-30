@@ -17,5 +17,4 @@ interface AuthRepository {
     fun logout()
     fun getBalance(onResult: (Double) -> Unit)
     fun transfer(recipientEmail: String, amount: Double, onResult: (Boolean, String) -> Unit)
-    fun getUserBalance(onResult: (Double) -> Unit)
 }

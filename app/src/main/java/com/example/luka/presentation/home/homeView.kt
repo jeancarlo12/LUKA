@@ -76,21 +76,9 @@ fun HomeView(viewModel: HomeViewModel = viewModel(),
 
         Spacer(modifier = Modifier.weight(1f))
 
-        RecentTransaction(viewModel)
+        RecentTransaction(viewModel, navController)
         Spacer(modifier = Modifier.height(30.dp))
 
-        Button(
-            onClick = {
-                viewModel.addTransaction(
-                    title = "Transfer",
-                    amount = "-$50"
-                )
-            }
-        ) {
-            Text(
-                text = "Add Transaction"
-            )
-        }
         BottomBar()
     }
 }
@@ -281,10 +269,11 @@ fun ActionItem(icon: ImageVector, text: String,onClick:()->Unit={}) {
 }
 
 @Composable
-fun RecentTransaction(viewModel: HomeViewModel){
+fun RecentTransaction(viewModel: HomeViewModel, navController: NavController){
     Column{
         Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
             ){
             Text(
                 text = "Recent Transactions",
@@ -295,12 +284,15 @@ fun RecentTransaction(viewModel: HomeViewModel){
             Text(
                 text = "See All",
                 color = Color.Gray,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                modifier = Modifier.clickable {
+                    navController.navigate("transactions")
+                }
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
 
-        viewModel.transactions.forEach {
+        viewModel.transactions.reversed().take(5).forEach {
             TransactionItem(
                 title = it.title,
                 amount = it.amount

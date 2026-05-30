@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.luka.presentation.home.ActionScreen
 import com.example.luka.presentation.home.HomeView
 import com.example.luka.presentation.home.HomeViewModel
+import com.example.luka.presentation.home.TransactionsScreen
 import com.example.luka.presentation.login.LoginScreen
 import com.example.luka.presentation.login.LoginViewModel
 import com.example.luka.presentation.register.RegisterScreen
@@ -47,6 +48,12 @@ fun AppNavigation(){
         }
         composable("home"){
             HomeView(
+                viewModel = homeViewModel,
+                navController = navController
+            )
+        }
+        composable("transactions") {
+            TransactionsScreen(
                 viewModel = homeViewModel,
                 navController = navController
             )

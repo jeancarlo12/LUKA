@@ -2,9 +2,12 @@ package com.example.luka.presentation.home
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.luka.data.reposioRy.AuthRepositoryImpl
 
 class ActionViewModel : ViewModel() {
+    private val repository = AuthRepositoryImpl()
 
+    var successMessage = mutableStateOf("")
     var errorMessage = mutableStateOf("")
     var receiver = mutableStateOf("")
 
@@ -25,6 +28,7 @@ class ActionViewModel : ViewModel() {
     fun sendTransfer(homeViewModel: HomeViewModel) {
 
         errorMessage.value = ""
+        successMessage.value = ""
 
         if (receiver.value.isEmpty()) {
 
@@ -45,6 +49,16 @@ class ActionViewModel : ViewModel() {
 
             errorMessage.value = "Invalid amount"
             return
+        }
+        repository.transfer(recipientEmail = receiver.value, amount = transferAmount) { success, message ->
+            if (success) {
+                successMessage.value = message
+                homeViewModel.loadBalance()
+
+                homeViewModel.loadTrasanctions()
+            }else{
+                errorMessage.value = message
+            }
         }
 
         if (transferAmount > homeViewModel.balance.value) {
