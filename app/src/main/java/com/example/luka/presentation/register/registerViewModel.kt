@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import com.example.luka.data.reposioRy.AuthRepositoryImpl
 import com.example.luka.domain.useCase.RegisterUseCase
 import com.example.luka.domain.model.User
-import kotlinx.coroutines.delay
 
 class registerViewModel(
     private val registerUseCase: RegisterUseCase = RegisterUseCase(AuthRepositoryImpl())

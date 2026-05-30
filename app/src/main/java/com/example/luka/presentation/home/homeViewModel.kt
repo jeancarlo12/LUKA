@@ -9,7 +9,6 @@ import com.example.luka.domain.useCase.GetBalanceUseCase
 import com.example.luka.domain.useCase.GetTransactionsUseCase
 import com.example.luka.domain.useCase.getUserNameUseCase
 import com.example.luka.domain.useCase.logOutUserCase
-import com.example.luka.domain.useCase.saveTransactionUseCase
 
 class HomeViewModel : ViewModel() {
 
@@ -19,66 +18,20 @@ class HomeViewModel : ViewModel() {
         AuthRepositoryImpl())
     private val getTransactionsUseCase = GetTransactionsUseCase(
         AuthRepositoryImpl())
-    private val saveTransactionUseCase = saveTransactionUseCase(
-        AuthRepositoryImpl())
 
     var isBalancedVisible = mutableStateOf(true)
         private set
     var userName = mutableStateOf("")
-    var balance = mutableStateOf(3000000.0)
-    var transactions = mutableStateListOf(
+    var balance = mutableStateOf(0.0)
+    var transactions = mutableStateListOf<Transaction>()
 
-        Transaction(
-            title = "Netflix",
-            amount = "-$35",
-            date = "Today"
-        ),
-
-        Transaction(
-            title = "Spotify",
-            amount = "-$15",
-            date = "Today"
-        )
-
-    )
-
-    fun addTransaction(
-        title:String,
-        amount:String
-    ){
-
-        val transaction = Transaction(
-                title = title,
-                amount = amount,
-                date = "Today"
-            )
-        transactions.add(transaction)
-
-        balance.value -=
-            amount
-                .replace("-$","")
-                .toDouble()
-
-        saveTransactionUseCase(transaction){
-            success->
-        }
-    }
-    fun loadTrasanctions(){
-
-        getTransactionsUseCase{ loadedTrasanctions->
+    fun loadTrasanctions() {
+        getTransactionsUseCase { loadedTransactions ->
             transactions.clear()
-            transactions.addAll(loadedTrasanctions)
-
-            balance.value = 3000000.0
-
-            loadedTrasanctions.forEach{
-                val value=it.amount
-                    .replace("-$","")
-                    .toDoubleOrNull()
-                    ?:0.0
-
-                balance.value -= value
-            }
+            // Sort by timestamp descending (newest first). 
+            // Older ones with timestamp 0L will go to the bottom.
+            val sortedTransactions = loadedTransactions.sortedByDescending { it.timestamp }
+            transactions.addAll(sortedTransactions)
         }
     }
     fun loadUsername(){

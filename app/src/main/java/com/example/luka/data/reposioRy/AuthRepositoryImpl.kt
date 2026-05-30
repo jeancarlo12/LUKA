@@ -77,26 +77,7 @@ class AuthRepositoryImpl : AuthRepository {
                 }
             }
     }
-    override fun saveTransaction(transaction: Transaction, onResult: (Boolean) -> Unit) {
-        val uid = auth.currentUser?.uid
 
-        if (uid == null) {
-            onResult(false)
-            return
-        }
-
-        firestore
-            .collection("users")
-            .document(uid)
-            .collection("transactions")
-            .add(transaction)
-            .addOnSuccessListener {
-                onResult(true)
-            }
-            .addOnFailureListener {
-                onResult(false)
-            }
-    }
     override fun getTransactions(onResult:(List<Transaction>) -> Unit){
         val uid= auth.currentUser?.uid
 
@@ -195,26 +176,43 @@ class AuthRepositoryImpl : AuthRepository {
 
                         val newSenderBalance = senderBalance - amount
                         val newReceiverBalance = receiverBalance + amount
-                        
+                        val senderEmail = auth.currentUser?.email ?: "Unknown"
 
-                        firestore
-                            .collection("users")
-                            .document(senderUid)
-                            .update("balance", newSenderBalance)
+                        // Prepare transactions
+                        val debitTransaction = Transaction(
+                            title = recipientEmail,
+                            amount = "-$${amount.toInt()}",
+                            date = "Today",
+                            timestamp = System.currentTimeMillis()
+                        )
+
+                        val creditTransaction = Transaction(
+                            title = senderEmail,
+                            amount = "+$${amount.toInt()}",
+                            date = "Today",
+                            timestamp = System.currentTimeMillis()
+                        )
+
+                        val batch = firestore.batch()
+                        val senderRef = firestore.collection("users").document(senderUid)
+                        val receiverRef = firestore.collection("users").document(receiverUid)
+                        
+                        batch.update(senderRef, "balance", newSenderBalance)
+                        batch.update(receiverRef, "balance", newReceiverBalance)
+                        
+                        val senderTransRef = senderRef.collection("transactions").document()
+                        val receiverTransRef = receiverRef.collection("transactions").document()
+                        
+                        batch.set(senderTransRef, debitTransaction)
+                        batch.set(receiverTransRef, creditTransaction)
+
+                        batch.commit()
                             .addOnSuccessListener {
-                                firestore
-                                    .collection("users")
-                                    .document(receiverUid)
-                                    .update("balance", newReceiverBalance)
-                                    .addOnSuccessListener {
-                                        onResult(true, "Transfer successful")
-                                    }
-                                    .addOnFailureListener {
-                                        onResult(false, "Transfer failed updating receiver")
-                                    }
+                                onResult(true, "Transfer successful")
                             }
-                            .addOnFailureListener {
-                                onResult(false, "Transfer failed updating sender")
+                            .addOnFailureListener { e ->
+                                Log.e("LUKA_DEBUG", "Transfer batch failed", e)
+                                onResult(false, "Transfer failed during final save")
                             }
                     }
                     .addOnFailureListener {
@@ -224,6 +222,21 @@ class AuthRepositoryImpl : AuthRepository {
             .addOnFailureListener {
                 onResult(false, "Transfer failed")
             }
+    }
+
+    override fun saveTransaction(transaction: Transaction, onResult: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onResult(false)
+            return
+        }
+
+        firestore.collection("users")
+            .document(uid)
+            .collection("transactions")
+            .add(transaction)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
     }
 }
 

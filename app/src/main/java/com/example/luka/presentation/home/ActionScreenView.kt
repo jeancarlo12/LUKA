@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+import androidx.compose.material3.CircularProgressIndicator
+
 @Composable
 fun ActionScreen(
     title:String,
@@ -36,9 +38,14 @@ fun ActionScreen(
         contentAlignment =
             Alignment.Center
     ){
+        if (viewModel.isLoading.value) {
+            CircularProgressIndicator(color = Color.White)
+        }
+
         Column(
             horizontalAlignment =
-                Alignment.CenterHorizontally
+                Alignment.CenterHorizontally,
+            modifier = Modifier.padding(24.dp)
         ){
             Text(
                 text = title,
@@ -49,37 +56,21 @@ fun ActionScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             OutlinedTextField(
-
                 value = viewModel.receiver.value,
-
-                onValueChange = {
-                    viewModel.updateReceiver(it)
-                },
-
-                label = {
-                    Text("Recipient Email")
-                }
-
+                onValueChange = { viewModel.updateReceiver(it) },
+                label = { Text("Recipient Email") },
+                enabled = !viewModel.isLoading.value
             )
             Spacer(modifier = Modifier.height(15.dp))
 
             OutlinedTextField(
-                value =
-                    viewModel.amount.value,
-                onValueChange = {
-                    viewModel.updateAmount(it)
-                },
-
-                label = {
-                    Text(
-                        "Amount"
-                    )
-
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                )
+                value = viewModel.amount.value,
+                onValueChange = { viewModel.updateAmount(it) },
+                label = { Text("Amount") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                enabled = !viewModel.isLoading.value
             )
+            
             if(viewModel.errorMessage.value.isNotEmpty()){
                 Spacer(modifier= Modifier.height(10.dp))
                 Text(
@@ -87,41 +78,34 @@ fun ActionScreen(
                     color = Color.Red
                 )
             }
+            
             if(viewModel.successMessage.value.isNotEmpty()){
-
                 Spacer(modifier = Modifier.height(10.dp))
-
                 Text(
                     text = viewModel.successMessage.value,
                     color = Color.Green
                 )
             }
 
-            if(
-                viewModel.successMessage.value.isNotEmpty()){
+            if(viewModel.successMessage.value.isNotEmpty()){
                 LaunchedEffect(Unit){
                     navController.popBackStack()
-
                 }
-
             }
 
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Button(onClick = {
-                    viewModel.sendTransfer(homeViewModel)
-                }
+            Button(
+                onClick = {
+                    viewModel.sendTransfer {
+                        homeViewModel.loadBalance()
+                        homeViewModel.loadTrasanctions()
+                    }
+                },
+                enabled = !viewModel.isLoading.value
             ) {
-                Text(
-                    text = "Send"
-                )
-
+                Text(text = "Send")
             }
-
         }
-
     }
-
 }

@@ -40,6 +40,10 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.automirrored.filled.CallMade
+import androidx.compose.material.icons.automirrored.filled.CallReceived
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
@@ -292,7 +296,7 @@ fun RecentTransaction(viewModel: HomeViewModel, navController: NavController){
         }
         Spacer(modifier = Modifier.height(15.dp))
 
-        viewModel.transactions.reversed().take(5).forEach {
+        viewModel.transactions.take(5).forEach {
             TransactionItem(
                 title = it.title,
                 amount = it.amount
@@ -304,6 +308,11 @@ fun RecentTransaction(viewModel: HomeViewModel, navController: NavController){
 
 @Composable
 fun TransactionItem(title: String, amount: String){
+    val isCredit = amount.startsWith("+")
+    val icon = if (isCredit) Icons.AutoMirrored.Filled.CallReceived else Icons.AutoMirrored.Filled.CallMade
+    val iconBackground = if (isCredit) Color(0xFF2D6A4F) else Color(0xFF780000)
+    val amountColor = if (isCredit) Color(0xFF4ADE80) else Color(0xFFF87171)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -314,41 +323,52 @@ fun TransactionItem(title: String, amount: String){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(iconBackground.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconBackground,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
 
-            Column {
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
-                    text = title,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text = "Today",
-                    color = Color.Gray,
-                    fontSize = 12.sp
-                )
-
+                Column {
+                    Text(
+                        text = title,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = "Today",
+                        color = Color.Gray,
+                        fontSize = 11.sp
+                    )
+                }
             }
 
             Text(
                 text = amount,
-                color = if(amount.contains("+"))
-                    Color.Green
-                else
-                    Color.Red,
-
+                color = amountColor,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
-
         }
-
     }
-
 }
 @Composable
 fun BottomBar(){
