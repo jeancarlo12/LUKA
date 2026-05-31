@@ -3,7 +3,7 @@ package com.example.luka.presentation.home
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.luka.data.reposioRy.AuthRepositoryImpl
+import com.example.luka.data.repository.AuthRepositoryImpl
 import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.useCase.GetBalanceUseCase
 import com.example.luka.domain.useCase.GetTransactionsUseCase

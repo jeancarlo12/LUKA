@@ -1,4 +1,4 @@
-package com.example.luka.data.reposioRy
+package com.example.luka.data.repository
 
 import android.util.Log
 import com.example.luka.domain.model.Transaction
@@ -239,4 +239,3 @@ class AuthRepositoryImpl : AuthRepository {
             .addOnFailureListener { onResult(false) }
     }
 }
-

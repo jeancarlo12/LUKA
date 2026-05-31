@@ -1,6 +1,5 @@
 package com.example.luka.presentation.home
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,15 +39,10 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.automirrored.filled.CallMade
-import androidx.compose.material.icons.automirrored.filled.CallReceived
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.focus.focusModifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
@@ -60,30 +54,45 @@ fun HomeView(viewModel: HomeViewModel = viewModel(),
         viewModel.loadUsername()
         viewModel.loadBalance()
     }
-    Column(
+    
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D1B2A)) 
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFF0D1B2A))
     ) {
-        HeaderSection(viewModel, navController)
-        
-        Spacer(modifier = Modifier.height(30.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            HeaderSection(viewModel, navController)
+            
+            Spacer(modifier = Modifier.height(30.dp))
 
-        BalanceCard(viewModel)
+            BalanceCard(viewModel)
 
-        Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-        QuickActions(navController)
+            QuickActions(navController)
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(40.dp))
 
-        RecentTransaction(viewModel, navController)
-        Spacer(modifier = Modifier.height(30.dp))
+            RecentTransaction(viewModel, navController)
+            
+            // Espacio extra para que el scroll no tape el contenido con la barra inferior
+            Spacer(modifier = Modifier.height(100.dp))
+        }
 
-        BottomBar()
+        // Barra inferior fija en la parte de abajo
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(24.dp)
+        ) {
+            BottomBar()
+        }
     }
 }
 
@@ -105,6 +114,7 @@ fun HeaderSection(viewModel: HomeViewModel, navController: NavController) {
                 text = "Welcome to luka",
                 color = Color.Gray
             )
+            Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = {
                     viewModel.logout()
@@ -121,7 +131,6 @@ fun HeaderSection(viewModel: HomeViewModel, navController: NavController) {
                     color = Color.White
                 )
             }
-            
         }
     }
 }
@@ -145,10 +154,26 @@ fun BalanceCard(viewModel: HomeViewModel) {
                 .padding(24.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Available balance",
-                color = Color.LightGray,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Available balance",
+                    color = Color.LightGray,
+                )
+                IconButton(onClick = {viewModel.balancedVisibility()}) {
+                    Icon(imageVector =
+                    if(isVisible)
+                        Icons.Default.Visibility
+                    else
+                        Icons.Default.VisibilityOff,
+                        contentDescription = "Toggle balance",
+                        tint = Color.White
+                    )
+                }
+            }
             Text(
                 text = if(isVisible)
                     "$${viewModel.balance.value.toInt()}"
@@ -160,18 +185,6 @@ fun BalanceCard(viewModel: HomeViewModel) {
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
-            Spacer(modifier= Modifier.width(8.dp))
-
-            IconButton(onClick = {viewModel.balancedVisibility()}) {
-                Icon(imageVector =
-                if(isVisible)
-                    Icons.Default.Visibility
-                else
-                    Icons.Default.VisibilityOff,
-                    "Toggle balance",
-                    tint = Color.White
-                )
-            }
         }
     }
 }
@@ -237,19 +250,17 @@ fun QuickActions(navController: NavController){
 }
 
 @Composable
-fun ActionItem(icon: ImageVector, text: String,onClick:()->Unit={}) {
+fun ActionItem(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(modifier = Modifier
-            .size(
-                width = 75.dp,
-                height = 90.dp
-            )
+            .size(75.dp)
             .clickable{
                 onClick()
             },
-
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1B263B)),
+            shape = RoundedCornerShape(20.dp)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -308,11 +319,6 @@ fun RecentTransaction(viewModel: HomeViewModel, navController: NavController){
 
 @Composable
 fun TransactionItem(title: String, amount: String){
-    val isCredit = amount.startsWith("+")
-    val icon = if (isCredit) Icons.AutoMirrored.Filled.CallReceived else Icons.AutoMirrored.Filled.CallMade
-    val iconBackground = if (isCredit) Color(0xFF2D6A4F) else Color(0xFF780000)
-    val amountColor = if (isCredit) Color(0xFF4ADE80) else Color(0xFFF87171)
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -323,52 +329,41 @@ fun TransactionItem(title: String, amount: String){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(18.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(iconBackground.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = iconBackground,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
 
-                Spacer(modifier = Modifier.width(12.dp))
+            Column {
 
-                Column {
-                    Text(
-                        text = title,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = "Today",
-                        color = Color.Gray,
-                        fontSize = 11.sp
-                    )
-                }
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Today",
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+
             }
 
             Text(
                 text = amount,
-                color = amountColor,
-                fontSize = 14.sp,
+                color = if(amount.contains("+"))
+                    Color.Green
+                else
+                    Color.Red,
+
                 fontWeight = FontWeight.Bold
             )
+
         }
+
     }
+
 }
 @Composable
 fun BottomBar(){
@@ -455,22 +450,3 @@ fun BottomItem(
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
