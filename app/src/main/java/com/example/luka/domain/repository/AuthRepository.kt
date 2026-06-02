@@ -3,6 +3,7 @@ package com.example.luka.domain.repository
 import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.model.User
 import com.example.luka.domain.model.SavingGoal
+import com.example.luka.domain.model.PaymentReminder
 
 interface AuthRepository {
     fun registerUser(
@@ -24,4 +25,7 @@ interface AuthRepository {
     suspend fun updatePhoneNumber(newPhone: String): Boolean
     suspend fun updateEmail(newEmail: String): Boolean
     suspend fun updatePassword(newPassword: String): Boolean
+    suspend fun getPaymentReminders(): List<PaymentReminder>
+    suspend fun addPaymentReminder(reminder: PaymentReminder): Boolean
+    suspend fun deletePaymentReminder(reminderId: String): Boolean
 }

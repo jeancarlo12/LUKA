@@ -5,6 +5,7 @@ import com.example.luka.data.dataSource.FirebaseDataSource
 import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.model.User
 import com.example.luka.domain.model.SavingGoal
+import com.example.luka.domain.model.PaymentReminder
 import com.example.luka.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -107,4 +108,13 @@ class AuthRepositoryImpl : AuthRepository {
 
     override suspend fun updatePassword(newPassword: String): Boolean =
         firebaseDataSource.updatePassword(newPassword)
+
+    override suspend fun getPaymentReminders(): List<PaymentReminder> =
+        firebaseDataSource.getPaymentReminders()
+
+    override suspend fun addPaymentReminder(reminder: PaymentReminder): Boolean =
+        firebaseDataSource.addPaymentReminder(reminder)
+
+    override suspend fun deletePaymentReminder(reminderId: String): Boolean =
+        firebaseDataSource.deletePaymentReminder(reminderId)
 }

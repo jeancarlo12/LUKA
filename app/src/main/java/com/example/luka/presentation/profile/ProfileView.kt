@@ -1,9 +1,11 @@
 package com.example.luka.presentation.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +39,6 @@ fun ProfileView(
         viewModel.loadUserData()
     }
 
-    // Actualizar campos locales cuando cargue el usuario
     LaunchedEffect(viewModel.user.value) {
         viewModel.user.value?.let {
             editPhone = it.phoneNumber
@@ -58,7 +60,6 @@ fun ProfileView(
         ) {
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Foto/Icono de perfil
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = "Profile",
@@ -89,13 +90,18 @@ fun ProfileView(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Campo Celular
+            // Campo Celular (Solo números)
             ProfileEditField(
                 label = "Phone Number",
                 value = editPhone,
-                onValueChange = { editPhone = it },
+                onValueChange = { 
+                    if (it.all { char -> char.isDigit() }) {
+                        editPhone = it
+                    }
+                },
                 icon = Icons.Default.Phone,
-                onUpdate = { viewModel.updatePhone(editPhone) }
+                onUpdate = { viewModel.updatePhone(editPhone) },
+                keyboardType = KeyboardType.Number
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -106,7 +112,8 @@ fun ProfileView(
                 value = editEmail,
                 onValueChange = { editEmail = it },
                 icon = Icons.Default.Email,
-                onUpdate = { viewModel.updateEmail(editEmail) }
+                onUpdate = { viewModel.updateEmail(editEmail) },
+                keyboardType = KeyboardType.Email
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -121,15 +128,13 @@ fun ProfileView(
                     if (editPass.length >= 6) viewModel.updatePassword(editPass)
                     else viewModel.updateMessage.value = "Min 6 chars"
                 },
-                isPassword = true
+                keyboardType = KeyboardType.Password
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Botón Logout
             Button(
                 onClick = {
-                    // Usar un viewModel para logout si es necesario, o directamente del repo
                     navController.navigate("login") {
                         popUpTo(0)
                     }
@@ -160,7 +165,7 @@ fun ProfileEditField(
     onValueChange: (String) -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onUpdate: () -> Unit,
-    isPassword: Boolean = false
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = label, color = Color.Gray, fontSize = 12.sp)
@@ -173,6 +178,7 @@ fun ProfileEditField(
                 onValueChange = onValueChange,
                 modifier = Modifier.weight(1f),
                 leadingIcon = { Icon(icon, contentDescription = null, tint = Color(0xFF415A77)) },
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,

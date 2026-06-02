@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
@@ -403,6 +404,14 @@ fun BottomBar(navController: NavController){
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = true }
                     }
+                }
+            )
+
+            BottomItem(
+                icon = Icons.Default.CalendarMonth,
+                text = "Pay",
+                onClick = {
+                    navController.navigate("pay")
                 }
             )
 

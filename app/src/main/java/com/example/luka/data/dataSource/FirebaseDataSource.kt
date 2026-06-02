@@ -3,9 +3,13 @@ package com.example.luka.data.dataSource
 import com.example.luka.domain.model.SavingGoal
 import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.model.User
+import com.example.luka.domain.model.PaymentReminder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class FirebaseDataSource {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -148,8 +152,11 @@ class FirebaseDataSource {
             
             val senderEmail = getCurrentEmail() ?: "Unknown"
             
-            val debitTrans = Transaction(recipientEmail, "-$${amount.toInt()}", "Today", System.currentTimeMillis())
-            val creditTrans = Transaction(senderEmail, "+$${amount.toInt()}", "Today", System.currentTimeMillis())
+            // Formatear la fecha actual
+            val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+            
+            val debitTrans = Transaction(recipientEmail, "-$${amount.toInt()}", currentDate, System.currentTimeMillis())
+            val creditTrans = Transaction(senderEmail, "+$${amount.toInt()}", currentDate, System.currentTimeMillis())
             
             firestore.runBatch { batch ->
                 val senderRef = firestore.collection("users").document(senderUid)
@@ -190,6 +197,42 @@ class FirebaseDataSource {
                 transaction.update(userRef, "balance", balance + currentAmount)
                 transaction.delete(goalRef)
             }.await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun getPaymentReminders(): List<PaymentReminder> {
+        val uid = getCurrentUid() ?: return emptyList()
+        return try {
+            val result = firestore.collection("users")
+                .document(uid)
+                .collection("paymentReminders")
+                .get()
+                .await()
+            result.documents.mapNotNull { doc ->
+                doc.toObject(PaymentReminder::class.java)?.copy(id = doc.id)
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun addPaymentReminder(reminder: PaymentReminder): Boolean {
+        val uid = getCurrentUid() ?: return false
+        return try {
+            firestore.collection("users").document(uid).collection("paymentReminders").add(reminder).await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun deletePaymentReminder(reminderId: String): Boolean {
+        val uid = getCurrentUid() ?: return false
+        return try {
+            firestore.collection("users").document(uid).collection("paymentReminders").document(reminderId).delete().await()
             true
         } catch (e: Exception) {
             false
