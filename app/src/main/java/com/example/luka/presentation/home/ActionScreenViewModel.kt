@@ -3,14 +3,17 @@ package com.example.luka.presentation.home
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.luka.data.repository.AuthRepositoryImpl
 import com.example.luka.domain.model.SavingGoal
-import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.repository.AuthRepository
+import com.example.luka.domain.useCase.TransferUseCase
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 class ActionViewModel : ViewModel() {
     private val repository: AuthRepository = AuthRepositoryImpl()
+    private val transferUseCase = TransferUseCase(repository)
 
     var successMessage = mutableStateOf("")
     var errorMessage = mutableStateOf("")
@@ -21,11 +24,12 @@ class ActionViewModel : ViewModel() {
     // Funcionalidad de Ahorro Inteligente
     var isSmartSavingEnabled = mutableStateOf(false)
     var savingGoals = mutableStateListOf<SavingGoal>()
-    var selectedGoalId = mutableStateOf<String?>(null) // null significa "Mantener libre"
-    var savingThreshold = mutableStateOf("50000") // Tope para activar el ahorro
+    var selectedGoalId = mutableStateOf<String?>(null)
+    var savingThreshold = mutableStateOf("50000")
 
     fun loadSavingGoals() {
-        repository.getSavingGoals { goals ->
+        viewModelScope.launch {
+            val goals = repository.getSavingGoals()
             savingGoals.clear()
             savingGoals.addAll(goals)
         }
@@ -62,59 +66,37 @@ class ActionViewModel : ViewModel() {
 
         isLoading.value = true
 
-        // Realizamos la transferencia principal
-        repository.transfer(recipientEmail = receiver.value, amount = transferAmount) { success, message ->
-            if (success) {
-                // Revisamos si el ahorro inteligente está activo y si supera el tope
+        viewModelScope.launch {
+            val result = transferUseCase(recipientEmail = receiver.value, amount = transferAmount)
+            if (result.first) {
                 val threshold = savingThreshold.value.toDoubleOrNull() ?: 0.0
                 
                 if (isSmartSavingEnabled.value && transferAmount >= threshold) {
-                    processSmartSaving(transferAmount) {
-                        isLoading.value = false
-                        successMessage.value = "Transfer successful! Smart Saving applied."
-                        onSuccess()
-                    }
+                    processSmartSaving(transferAmount)
+                    successMessage.value = "Transfer successful! Smart Saving applied."
                 } else if (isSmartSavingEnabled.value && transferAmount < threshold) {
-                    // El ahorro estaba activo pero no llegó al tope
-                    isLoading.value = false
-                    successMessage.value = "Transfer successful! (No saving applied: amount below $${threshold.toInt()})"
-                    onSuccess()
+                    successMessage.value = "Transfer successful! (No saving: below threshold)"
                 } else {
-                    isLoading.value = false
-                    successMessage.value = message
-                    onSuccess()
+                    successMessage.value = result.second
                 }
+                isLoading.value = false
+                onSuccess()
             } else {
                 isLoading.value = false
-                errorMessage.value = message
+                errorMessage.value = result.second
             }
         }
     }
 
-    private fun processSmartSaving(originalAmount: Double, onFinish: () -> Unit) {
-        // Redondeo al siguiente 1000 (ej: 1250 -> 2000)
+    private suspend fun processSmartSaving(originalAmount: Double) {
         val roundedAmount = ceil(originalAmount / 1000.0) * 1000.0
         val spareChange = roundedAmount - originalAmount
 
         if (spareChange > 0) {
-            // Descontamos el "vuelto" del balance principal
-            repository.adjustBalance(-spareChange) { success ->
-                if (success) {
-                    if (selectedGoalId.value != null) {
-                        // Si el usuario eligió una meta, guardamos el dinero allí
-                        repository.updateSavingGoal(selectedGoalId.value!!, spareChange) {
-                            onFinish()
-                        }
-                    } else {
-                        // Dinero queda "libre" (ya se descontó del balance)
-                        onFinish()
-                    }
-                } else {
-                    onFinish()
-                }
+            val success = repository.adjustBalance(-spareChange)
+            if (success && selectedGoalId.value != null) {
+                repository.updateSavingGoal(selectedGoalId.value!!, spareChange)
             }
-        } else {
-            onFinish()
         }
     }
 }

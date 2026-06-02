@@ -91,7 +91,7 @@ fun HomeView(viewModel: HomeViewModel = viewModel(),
                 .align(Alignment.BottomCenter)
                 .padding(24.dp)
         ) {
-            BottomBar()
+            BottomBar(navController)
         }
     }
 }
@@ -366,7 +366,7 @@ fun TransactionItem(title: String, amount: String){
 
 }
 @Composable
-fun BottomBar(){
+fun BottomBar(navController: NavController){
 
     Card(
 
@@ -390,7 +390,7 @@ fun BottomBar(){
                 .padding(horizontal = 25.dp),
 
             horizontalArrangement =
-                Arrangement.SpaceBetween,
+                Arrangement.SpaceEvenly,
 
             verticalAlignment =
                 Alignment.CenterVertically
@@ -398,22 +398,20 @@ fun BottomBar(){
 
             BottomItem(
                 icon = Icons.Default.Home,
-                text = "Home"
-            )
-
-            BottomItem(
-                icon = Icons.Default.CreditCard,
-                text = "Cards"
-            )
-
-            BottomItem(
-                icon = Icons.Default.BarChart,
-                text = "Activity"
+                text = "Home",
+                onClick = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
             )
 
             BottomItem(
                 icon = Icons.Default.Person,
-                text = "Profile"
+                text = "Profile",
+                onClick = {
+                    navController.navigate("profile")
+                }
             )
 
         }
@@ -425,13 +423,15 @@ fun BottomBar(){
 @Composable
 fun BottomItem(
     icon: ImageVector,
-    text:String
+    text:String,
+    onClick: () -> Unit = {}
 ){
 
     Column(
 
         horizontalAlignment =
-            Alignment.CenterHorizontally
+            Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
 
     ) {
 

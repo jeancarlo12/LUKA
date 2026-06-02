@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.analytics)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material.icons.extended)

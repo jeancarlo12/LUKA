@@ -9,15 +9,19 @@ interface AuthRepository {
         user: User,
         onResult: (Boolean, Int) -> Unit
     )
-    fun getTransactions(onResult: (List<Transaction>) -> Unit)
-    fun getUserName(onResult: (String) -> Unit)
+    suspend fun getTransactions(): List<Transaction>
+    suspend fun getUserName(): String
+    suspend fun getFullUserData(): User?
     fun logout()
-    fun getBalance(onResult: (Double) -> Unit)
-    fun transfer(recipientEmail: String, amount: Double, onResult: (Boolean, String) -> Unit)
-    fun saveTransaction(transaction: Transaction, onResult: (Boolean) -> Unit)
-    fun getSavingGoals(onResult: (List<SavingGoal>) -> Unit)
-    fun updateSavingGoal(goalId: String, amountToAdd: Double, onResult: (Boolean) -> Unit)
-    fun adjustBalance(delta: Double, onResult: (Boolean) -> Unit)
-    fun addSavingGoal(goal: SavingGoal, onResult: (Boolean) -> Unit)
-    fun deleteSavingGoal(goalId: String, currentAmount: Double, onResult: (Boolean) -> Unit)
+    suspend fun getBalance(): Double
+    suspend fun transfer(recipientEmail: String, amount: Double): Pair<Boolean, String>
+    suspend fun saveTransaction(transaction: Transaction): Boolean
+    suspend fun getSavingGoals(): List<SavingGoal>
+    suspend fun updateSavingGoal(goalId: String, amountToAdd: Double): Boolean
+    suspend fun adjustBalance(delta: Double): Boolean
+    suspend fun addSavingGoal(goal: SavingGoal): Boolean
+    suspend fun deleteSavingGoal(goalId: String, currentAmount: Double): Boolean
+    suspend fun updatePhoneNumber(newPhone: String): Boolean
+    suspend fun updateEmail(newEmail: String): Boolean
+    suspend fun updatePassword(newPassword: String): Boolean
 }

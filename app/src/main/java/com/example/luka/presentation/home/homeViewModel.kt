@@ -3,21 +3,21 @@ package com.example.luka.presentation.home
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.luka.data.repository.AuthRepositoryImpl
 import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.useCase.GetBalanceUseCase
 import com.example.luka.domain.useCase.GetTransactionsUseCase
 import com.example.luka.domain.useCase.getUserNameUseCase
 import com.example.luka.domain.useCase.logOutUserCase
+import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
 
     private val getBalanceUseCase = GetBalanceUseCase(AuthRepositoryImpl())
     private val logOutUserCase = logOutUserCase(AuthRepositoryImpl())
-    private val getUserNameUseCase = getUserNameUseCase(
-        AuthRepositoryImpl())
-    private val getTransactionsUseCase = GetTransactionsUseCase(
-        AuthRepositoryImpl())
+    private val getUserNameUseCase = getUserNameUseCase(AuthRepositoryImpl())
+    private val getTransactionsUseCase = GetTransactionsUseCase(AuthRepositoryImpl())
 
     var isBalancedVisible = mutableStateOf(true)
         private set
@@ -26,30 +26,31 @@ class HomeViewModel : ViewModel() {
     var transactions = mutableStateListOf<Transaction>()
 
     fun loadTrasanctions() {
-        getTransactionsUseCase { loadedTransactions ->
+        viewModelScope.launch {
+            val loadedTransactions = getTransactionsUseCase()
             transactions.clear()
-            // Sort by timestamp descending (newest first). 
-            // Older ones with timestamp 0L will go to the bottom.
             val sortedTransactions = loadedTransactions.sortedByDescending { it.timestamp }
             transactions.addAll(sortedTransactions)
         }
     }
-    fun loadUsername(){
-        getUserNameUseCase {
-            userName.value = it
+
+    fun loadUsername() {
+        viewModelScope.launch {
+            userName.value = getUserNameUseCase()
         }
     }
 
-    fun logout(){
+    fun logout() {
         logOutUserCase()
     }
 
-    fun balancedVisibility(){
-        isBalancedVisible.value= !isBalancedVisible.value
+    fun balancedVisibility() {
+        isBalancedVisible.value = !isBalancedVisible.value
     }
-    fun loadBalance(){
-        getBalanceUseCase{
-            balance.value = it
+
+    fun loadBalance() {
+        viewModelScope.launch {
+            balance.value = getBalanceUseCase()
         }
     }
 }
