@@ -14,7 +14,7 @@ import com.example.luka.presentation.login.LoginScreen
 import com.example.luka.presentation.login.LoginViewModel
 import com.example.luka.presentation.register.RegisterScreen
 import com.example.luka.presentation.register.registerViewModel
-
+import com.example.luka.presentation.saving.SavingGoalsScreen
 @Composable
 fun AppNavigation(){
 
@@ -57,6 +57,9 @@ fun AppNavigation(){
                 viewModel = homeViewModel,
                 navController = navController
             )
+        }
+        composable("savingGoals") {
+            SavingGoalsScreen(navController = navController)
         }
         composable(route = "action/{title}"
         ){

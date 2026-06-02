@@ -217,10 +217,10 @@ fun QuickActions(navController: NavController){
 
             ActionItem(
                 icon = Icons.Default.CreditCard,
-                text = "Pay",
+                text = "Goal",
                 onClick = {
                     navController.navigate(
-                        "action/Pay"
+                        "savingGoals"
                     )
                 }
 

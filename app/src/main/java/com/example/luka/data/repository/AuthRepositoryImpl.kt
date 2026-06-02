@@ -3,6 +3,7 @@ package com.example.luka.data.repository
 import android.util.Log
 import com.example.luka.domain.model.Transaction
 import com.example.luka.domain.model.User
+import com.example.luka.domain.model.SavingGoal
 import com.example.luka.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -237,5 +238,112 @@ class AuthRepositoryImpl : AuthRepository {
             .add(transaction)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
+    }
+
+    override fun getSavingGoals(onResult: (List<SavingGoal>) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onResult(emptyList())
+            return
+        }
+
+        firestore.collection("users")
+            .document(uid)
+            .collection("savingGoals")
+            .get()
+            .addOnSuccessListener { result ->
+                val goals = result.documents.mapNotNull { doc ->
+                    val goal = doc.toObject(SavingGoal::class.java)
+                    goal?.copy(id = doc.id)
+                }
+                onResult(goals)
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    override fun updateSavingGoal(goalId: String, amountToAdd: Double, onResult: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onResult(false)
+            return
+        }
+
+        val goalRef = firestore.collection("users")
+            .document(uid)
+            .collection("savingGoals")
+            .document(goalId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(goalRef)
+            val currentAmount = snapshot.getDouble("currentAmount") ?: 0.0
+            val newAmount = currentAmount + amountToAdd
+            transaction.update(goalRef, "currentAmount", newAmount)
+        }.addOnSuccessListener {
+            onResult(true)
+        }.addOnFailureListener {
+            onResult(false)
+        }
+    }
+
+    override fun adjustBalance(delta: Double, onResult: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onResult(false)
+            return
+        }
+
+        val userRef = firestore.collection("users").document(uid)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(userRef)
+            val currentBalance = snapshot.getDouble("balance") ?: 0.0
+            transaction.update(userRef, "balance", currentBalance + delta)
+        }.addOnSuccessListener {
+            onResult(true)
+        }.addOnFailureListener {
+            onResult(false)
+        }
+    }
+
+    override fun addSavingGoal(goal: SavingGoal, onResult: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onResult(false)
+            return
+        }
+
+        firestore.collection("users")
+            .document(uid)
+            .collection("savingGoals")
+            .add(goal)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    override fun deleteSavingGoal(goalId: String, currentAmount: Double, onResult: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onResult(false)
+            return
+        }
+
+        val userRef = firestore.collection("users").document(uid)
+        val goalRef = userRef.collection("savingGoals").document(goalId)
+
+        firestore.runTransaction { transaction ->
+            // 1. Obtener balance actual
+            val userSnapshot = transaction.get(userRef)
+            val currentBalance = userSnapshot.getDouble("balance") ?: 0.0
+            
+            // 2. Sumar lo ahorrado al balance
+            transaction.update(userRef, "balance", currentBalance + currentAmount)
+            
+            // 3. Borrar la meta
+            transaction.delete(goalRef)
+        }.addOnSuccessListener {
+            onResult(true)
+        }.addOnFailureListener {
+            onResult(false)
+        }
     }
 }
