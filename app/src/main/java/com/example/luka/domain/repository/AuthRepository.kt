@@ -16,6 +16,7 @@ interface AuthRepository {
     fun logout()
     suspend fun getBalance(): Double
     suspend fun transfer(recipientEmail: String, amount: Double): Pair<Boolean, String>
+    suspend fun recharge(operator: String, phoneNumber: String, amount: Double, type: String): Pair<Boolean, String>
     suspend fun saveTransaction(transaction: Transaction): Boolean
     suspend fun getSavingGoals(): List<SavingGoal>
     suspend fun updateSavingGoal(goalId: String, amountToAdd: Double): Boolean

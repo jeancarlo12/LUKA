@@ -136,6 +136,11 @@ class FirebaseDataSource {
 
     suspend fun transfer(recipientEmail: String, amount: Double): Pair<Boolean, String> {
         val senderUid = getCurrentUid() ?: return Pair(false, "User not authenticated")
+        val senderEmail = getCurrentEmail()
+        
+        if (recipientEmail.equals(senderEmail, ignoreCase = true)) {
+            return Pair(false, "You cannot transfer money to yourself")
+        }
         
         return try {
             val query = firestore.collection("users").whereEqualTo("email", recipientEmail).get().await()
@@ -170,6 +175,34 @@ class FirebaseDataSource {
             }.await()
             
             Pair(true, "Transfer successful")
+        } catch (e: Exception) {
+            Pair(false, "Error: ${e.message}")
+        }
+    }
+
+    suspend fun recharge(operator: String, phoneNumber: String, amount: Double, type: String): Pair<Boolean, String> {
+        val uid = getCurrentUid() ?: return Pair(false, "User not authenticated")
+        return try {
+            val userRef = firestore.collection("users").document(uid)
+            val snapshot = userRef.get().await()
+            val currentBalance = snapshot.getDouble("balance") ?: 0.0
+
+            if (amount > currentBalance) return Pair(false, "Insufficient funds")
+
+            val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+            val rechargeTrans = Transaction(
+                title = "$type $operator ($phoneNumber)",
+                amount = "-$${amount.toInt()}",
+                date = currentDate,
+                timestamp = System.currentTimeMillis()
+            )
+
+            firestore.runBatch { batch ->
+                batch.update(userRef, "balance", currentBalance - amount)
+                batch.set(userRef.collection("transactions").document(), rechargeTrans)
+            }.await()
+
+            Pair(true, "Recharge of $${amount.toInt()} to $operator successful")
         } catch (e: Exception) {
             Pair(false, "Error: ${e.message}")
         }

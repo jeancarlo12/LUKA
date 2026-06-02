@@ -105,6 +105,22 @@ fun Form(registerViewModel: registerViewModel, onRegisterSuccess: () -> Unit ){
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
+            value = registerViewModel.PhoneNumber.value,
+            onValueChange = { 
+                if (it.all { char -> char.isDigit() } && it.length <= 10) {
+                    registerViewModel.PhoneNumber.value = it
+                }
+            },
+            label = { Text("Phone Number") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            singleLine = true,
+            colors = textFieldColors
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
             value = registerViewModel.DocumentNumber.value,
             onValueChange = { registerViewModel.DocumentNumber.value = it },
             label = { Text("Document Number") },

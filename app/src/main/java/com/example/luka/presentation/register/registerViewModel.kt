@@ -13,6 +13,7 @@ class registerViewModel(
 
     var fullName = mutableStateOf("")
     var Email = mutableStateOf("")
+    var PhoneNumber = mutableStateOf("")
     val DocumentNumber = mutableStateOf("")
     var Password = mutableStateOf("")
     var ConfirmPassword = mutableStateOf("")
@@ -23,11 +24,12 @@ class registerViewModel(
     fun register(onResult: (Boolean) -> Unit) {
         val fName = fullName.value.trim()
         val emailVal = Email.value.trim()
+        val phoneVal = PhoneNumber.value.trim()
         val docNum = DocumentNumber.value.trim()
         val pass = Password.value
         val confirmPass = ConfirmPassword.value
 
-        if (fName.isEmpty() || emailVal.isEmpty() || docNum.isEmpty() || pass.isEmpty()) {
+        if (fName.isEmpty() || emailVal.isEmpty() || phoneVal.isEmpty() || docNum.isEmpty() || pass.isEmpty()) {
             errorMessage.value = "All fields are required"
             return
         }
@@ -41,6 +43,11 @@ class registerViewModel(
             errorMessage.value = "Password must be at least 6 characters"
             return
         }
+        
+        if (phoneVal.length != 10) {
+            errorMessage.value = "Phone number must be 10 digits"
+            return
+        }
 
         isLoading.value = true
         errorMessage.value = null
@@ -49,6 +56,7 @@ class registerViewModel(
         val user = User(
             fullName = fName,
             email = emailVal,
+            phoneNumber = phoneVal,
             documentNumber = docNum,
             password = pass
         )

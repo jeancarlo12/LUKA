@@ -78,6 +78,9 @@ class AuthRepositoryImpl : AuthRepository {
     override suspend fun transfer(recipientEmail: String, amount: Double): Pair<Boolean, String> =
         firebaseDataSource.transfer(recipientEmail, amount)
 
+    override suspend fun recharge(operator: String, phoneNumber: String, amount: Double, type: String): Pair<Boolean, String> =
+        firebaseDataSource.recharge(operator, phoneNumber, amount, type)
+
     override suspend fun saveTransaction(transaction: Transaction): Boolean {
         val uid = firebaseDataSource.getCurrentUid() ?: return false
         return try {

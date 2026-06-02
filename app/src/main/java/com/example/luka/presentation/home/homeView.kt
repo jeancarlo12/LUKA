@@ -232,17 +232,7 @@ fun QuickActions(navController: NavController){
                 text = "Recharge",
                 onClick = {
                     navController.navigate(
-                        "action/recharge"
-                    )
-                }
-            )
-
-            ActionItem(
-                icon = Icons.Default.MoreHoriz,
-                text = "More",
-                onClick = {
-                    navController.navigate(
-                        "action/More"
+                        "action/Recharge"
                     )
                 }
             )

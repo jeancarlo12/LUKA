@@ -90,12 +90,12 @@ fun ProfileView(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Campo Celular (Solo números)
+            // Campo Celular (Solo números, máx 10 dígitos)
             ProfileEditField(
                 label = "Phone Number",
                 value = editPhone,
                 onValueChange = { 
-                    if (it.all { char -> char.isDigit() }) {
+                    if (it.all { char -> char.isDigit() } && it.length <= 10) {
                         editPhone = it
                     }
                 },
